@@ -28,7 +28,7 @@ class DateTime
      *
      * @return string 格式化后的日期字符串
      */
-    public static function timestampToString(int|string $timestamp, string $format = 'Y-m-d H:i:s'): string
+    public static function timestampToString(int|string|null $timestamp, string $format = 'Y-m-d H:i:s'): string
     {
         if (empty($timestamp)) {
             return '';
