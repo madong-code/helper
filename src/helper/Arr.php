@@ -842,6 +842,89 @@ class Arr
         return $array[$key] ?? ''; // 如果键不存在，返回 null
     }
 
+
+    /**
+     * 参数过滤处理
+     *
+     * @param array|object $params
+     * @param array        $rules 【'输入key','默认值','过滤值','重命名key'】
+     *
+     * @return array
+     */
+    public static function paramsFilter(array|object $params, array $rules): array
+    {
+        $params = is_object($params) ? (array)$params : $params;//兼容数组对象参数
+        /** @var TYPE_NAME $filteredParams */
+        $filteredParams = [];
+        foreach ($rules as $rule) {
+            $inputKey     = $rule[0] ?? null;
+            $defaultValue = $rule[1] ?? null;
+            $filterValue  = $rule[2] ?? null;
+            $replaceKey   = $rule[3] ?? null;
+            if (empty($inputKey)) {
+                continue;
+            }
+            //优先传入参数
+            if (array_key_exists($inputKey, $params)) {
+                $paramValue = $params[$inputKey];
+            } else {
+                $paramValue = $defaultValue;
+            }
+
+            // 参数值过滤
+            if (isset($filterValue) && !empty($filterValue)) {
+                switch ($filterValue) {
+                    case 'string':
+                        $paramValue = (string)$paramValue;
+                        break;
+                    case 'int':
+                        $paramValue = (int)$paramValue;
+                        break;
+                    case 'float':
+                        $paramValue = (float)$paramValue;
+                        break;
+                    case 'bool':
+                        $paramValue = filter_var($paramValue, FILTER_VALIDATE_BOOLEAN);
+                        break;
+                    default:
+                        // 自定义过滤器函数
+                        if (is_callable($filterValue)) {
+                            $paramValue = call_user_func($filterValue, $paramValue);
+                        } else {
+                            throw new InvalidArgumentException("Invalid filter specified for param {$inputKey}.");
+                        }
+                }
+            }
+
+            // 替换参数键名（可选）
+            $outputKey                  = $replaceKey ?? $inputKey;
+            $filteredParams[$outputKey] = $paramValue;
+        }
+
+        return $filteredParams;
+    }
+
+        public static function normalize($data, $separator = ','): array
+    {
+        if (is_array($data)) {
+            return $data;
+        } elseif (is_int($data) || is_string($data)) {
+            return explode($separator, $data);
+        } else {
+            throw new InvalidArgumentException('Data must be a string or an array.');
+        }
+    }
+
+    public static function filterArray($array): array
+    {
+        return array_filter($array, function ($value) {
+            return $value !== null && $value !== '';
+        });
+    }
+
+
+
+
 }
 
 
