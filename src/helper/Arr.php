@@ -903,7 +903,7 @@ class Arr
 
         return $filteredParams;
     }
-    
+
     public static function normalize($data, $separator = ','): array
     {
         if (is_array($data)) {
@@ -926,7 +926,7 @@ class Arr
         });
     }
 
-    protected function filterByWhere(array $data, array $where): array
+    public static function filterByWhere(array $data, array $where): array
     {
         if (empty($where)) {
             return $data;
