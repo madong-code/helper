@@ -15,6 +15,7 @@ namespace madong\helper;
 use ArrayAccess;
 use InvalidArgumentException;
 use stdClass;
+use Illuminate\Support\Collection;
 
 class Arr
 {
@@ -842,7 +843,6 @@ class Arr
         return $array[$key] ?? ''; // 如果键不存在，返回 null
     }
 
-
     /**
      * 参数过滤处理
      *
@@ -903,12 +903,16 @@ class Arr
 
         return $filteredParams;
     }
-
-        public static function normalize($data, $separator = ','): array
+    
+    public static function normalize($data, $separator = ','): array
     {
         if (is_array($data)) {
             return $data;
         } elseif (is_int($data) || is_string($data)) {
+            // 如果是空字符串，直接返回空数组
+            if ($data === '') {
+                return [];
+            }
             return explode($separator, $data);
         } else {
             throw new InvalidArgumentException('Data must be a string or an array.');
@@ -922,9 +926,31 @@ class Arr
         });
     }
 
-
-
-
+    protected function filterByWhere(array $data, array $where): array
+    {
+        if (empty($where)) {
+            return $data;
+        }
+        $collection = collect($data);
+        foreach ($where as $key => $condition) {
+            if (is_array($condition) && count($condition) === 3) {
+                // 处理 [['name', '=', 'test'], ['id', 'in', [1, 2]]] 格式
+                list($field, $operator, $value) = $condition;
+                if ($operator === 'in') {
+                    $collection = $collection->whereIn($field, $value);
+                } else {
+                    // 处理其他条件
+                    $collection = $collection->where($field, $operator, $value);
+                }
+                continue;
+            } elseif (is_array($condition) && count($condition) != 0) {
+                $collection = $collection->whereIn($key, $condition);
+            } else {
+                $collection = $collection->where($key, $condition);
+            }
+        }
+        return $collection->all();
+    }
 }
 
 
