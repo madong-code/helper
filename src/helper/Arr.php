@@ -933,24 +933,41 @@ class Arr
         }
         $collection = collect($data);
         foreach ($where as $key => $condition) {
-            if (is_array($condition) && count($condition) === 3) {
-                // 处理 [['name', '=', 'test'], ['id', 'in', [1, 2]]] 格式
-                list($field, $operator, $value) = $condition;
-                if ($operator === 'in') {
-                    $collection = $collection->whereIn($field, $value);
+            // 处理格式1: [id => [1,2,3], name => 'test']
+            if (!is_int($key)) {
+                if (is_array($condition)) {
+                    // 假设这是IN查询
+                    $collection = $collection->whereIn($key, $condition);
                 } else {
-                    // 处理其他条件
-                    $collection = $collection->where($field, $operator, $value);
+                    // 普通等值查询
+                    $collection = $collection->where($key, $condition);
                 }
                 continue;
-            } elseif (is_array($condition) && count($condition) != 0) {
-                $collection = $collection->whereIn($key, $condition);
-            } else {
-                $collection = $collection->where($key, $condition);
+            }
+
+            // 处理格式2: [['id', 'in', [1,2,3]], ['name', '=', 'test']]
+            if (is_array($condition)) {
+                $count = count($condition);
+
+                if ($count === 2) {
+                    // 简写格式，默认为等值查询: ['name', 'test']
+                    $collection = $collection->where($condition[0], $condition[1]);
+                } elseif ($count === 3) {
+                    // 完整格式: ['id', 'in', [1,2,3]]
+                    list($field, $operator, $value) = $condition;
+
+                    if ($operator === 'in') {
+                        $collection = $collection->whereIn($field, $value);
+                    } else {
+                        $collection = $collection->where($field, $operator, $value);
+                    }
+                }
+                // 更多或者异常抛出
             }
         }
         return $collection->all();
     }
+
 }
 
 
