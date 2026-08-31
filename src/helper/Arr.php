@@ -198,7 +198,7 @@ class Arr
      *
      * @return mixed|null
      */
-    public static function first(array $array, callable $callback = null, mixed $default = null): mixed
+    public static function first(array $array, ?callable $callback = null, mixed $default = null): mixed
     {
         if (is_null($callback)) {
             if (empty($array)) {
@@ -226,7 +226,7 @@ class Arr
      *
      * @return false|mixed|null
      */
-    public static function last(array $array, callable $callback = null, $default = null): mixed
+    public static function last(array $array, ?callable $callback = null, $default = null): mixed
     {
         if (is_null($callback)) {
             return empty($array) ? $default : end($array);
@@ -969,5 +969,4 @@ class Arr
     }
 
 }
-
 
