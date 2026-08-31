@@ -44,7 +44,7 @@ class DateTime
      *
      * @return int|false 时间戳，如果解析失败则返回 false
      */
-    public static function dateTimeStringToTimestamp(string $dateTimeStr, string $format = null): bool|int
+    public static function dateTimeStringToTimestamp(string $dateTimeStr, ?string $format = null): bool|int
     {
         if ($format === null) {
             // 不提供格式，使用 strtotime() 尝试解析
